@@ -7,7 +7,9 @@
     "start": "node dist/src/server.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "build": "tsc && tsc-alias",
-    "generate": "drizzle-kit generate:pg"
+    "generate": "drizzle-kit generate:pg",
+    "migrate": "tsx src/db/migrate.ts",
+    "generate-token": "tsx src/generateAdminToken.ts"
   },
   "keywords": [],
   "author": "Vincent Suryakim",
@@ -29,7 +31,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.17.41",
     "@types/pg": "^8.11.2",
     "drizzle-kit": "^0.20.14",
     "nodemon": "^3.1.0",
@@ -38,5 +40,10 @@
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt"
+    ]
   }
 }
