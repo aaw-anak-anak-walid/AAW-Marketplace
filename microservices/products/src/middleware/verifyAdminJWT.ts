@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+import { JwtPayload } from "jsonwebtoken";
 
-export const verifyJWT = async (
+export const verifyAdminJWT = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -14,15 +15,15 @@ export const verifyJWT = async (
 
     const payload = jwt.verify(
       token,
-      process.env.JWT_SECRET as string
+      process.env.ADMIN_JWT_SECRET as string
     ) as JwtPayload;
 
     const { id, tenant_id } = payload;
-    const SERVER_TENANT_ID = process.env.TENANT_ID;
+    const SERVER_TENANT_ID = process.env.ADMIN_TENANT_ID;
     if (!SERVER_TENANT_ID) {
       return res.status(500).send({ message: "Server tenant ID is missing" });
     }
-    if (tenant_id !== process.env.TENANT_ID) {
+    if (tenant_id !== process.env.ADMIN_TENANT_ID) {
       return res.status(401).send({ message: "Invalid token" });
     }
 
