@@ -32,6 +32,10 @@ WORKDIR /service-products
 # Copy built files from the previous stage
 COPY --from=builder /service-products/dist ./dist
 COPY --from=builder /service-products/package.json ./package.json
+COPY --from=builder /service-products/drizzle ./drizzle
+COPY --from=builder /service-products/entrypoint.sh ./entrypoint.sh
+
+RUN chmod +x ./entrypoint.sh
 
 # Install production dependencies only
 RUN npm install --only=production
@@ -40,4 +44,5 @@ RUN npm install --only=production
 EXPOSE 8002
 
 # Start the application
+ENTRYPOINT ["./entrypoint.sh"]
 CMD ["node", "dist/src/server.js"]

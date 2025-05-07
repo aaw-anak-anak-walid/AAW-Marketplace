@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import axios from "axios";
 
-export const verifyJWT = async (
+export const verifyTenant = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -9,14 +9,6 @@ export const verifyJWT = async (
   try {
     const token = req.headers.authorization?.split("Bearer ")[1];
     if (!token) {
-      return res.status(401).send({ message: "Invalid token" });
-    }
-
-    const payload = await axios.post(
-      `${process.env.AUTH_MS_URL}/user/verify-admin-token`,
-      { token }
-    );
-    if (payload.status !== 200) {
       return res.status(401).send({ message: "Invalid token" });
     }
 
@@ -36,15 +28,15 @@ export const verifyJWT = async (
       return res.status(500).send({ message: "Server Tenant not found" });
     }
 
+    const user = req.body.user;
+
     // Check for tenant ownership
-    if (payload.data.user.id !== tenantPayload.data.tenants.owner_id) {
-      return res.status(401).send({ message: "Invalid token" });
+    if (user.id !== tenantPayload.data.tenants.owner_id) {
+      return res.status(403).send({ message: "Not Authorized User" });
     }
 
-    req.body.user = payload.data.user;
     next();
   } catch (error) {
-    console.log("ini error: ", error);
     return res.status(401).send({ message: "Invalid token" });
   }
 };

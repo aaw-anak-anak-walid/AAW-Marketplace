@@ -1,14 +1,13 @@
 import {
   InternalServerErrorResponse,
   NotFoundResponse,
-} from "../src/commons/patterns";
+} from "@src/commons/patterns";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
-import { getUserByUsername } from "../src/user/dao/getUserByUsername.dao";
-import { NewUser, User } from "../db/schema/users";
-import { registerService } from "../src/user/services";
-import { insertNewUser } from "../src/user/dao/insertNewUser.dao";
+import { getUserByUsername } from "./user/dao/getUserByUsername.dao";
+import { NewUser, User } from "@db/schema/users";
+import { insertNewUser } from "./user/dao/insertNewUser.dao";
 
 export const GenerateAdminToken = async (
   username: string,
@@ -77,6 +76,7 @@ const registerAdmin = async (
     full_name,
     address,
     phone_number,
+    is_admin: true,
   };
 
   const newUser = await insertNewUser(userData);

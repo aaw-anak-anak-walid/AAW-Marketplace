@@ -8,14 +8,16 @@
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "build": "tsc && tsc-alias",
     "generate": "drizzle-kit generate:pg",
-    "migrate": "tsx src/db/migrate.ts",
-    "generate-token": "tsx src/generateAdminToken.ts"
+    "generate-token": "tsx src/generateAdminToken.ts",
+    "migrate": "drizzle-kit push:pg",
+    "seed:dev": "ts-node src/db/seed.ts"
   },
   "keywords": [],
   "author": "Vincent Suryakim",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.29.4",

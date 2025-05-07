@@ -32,6 +32,10 @@ WORKDIR /wishlist-service
 # Copy built files from the previous stage
 COPY --from=builder /wishlist-service/dist ./dist
 COPY --from=builder /wishlist-service/package.json ./package.json
+COPY --from=builder /wishlist-service/drizzle ./drizzle
+COPY --from=builder /wishlist-service/entrypoint.sh ./entrypoint.sh
+
+RUN chmod +x ./entrypoint.sh
 
 # Install production dependencies only
 RUN npm install --only=production
@@ -40,4 +44,5 @@ RUN npm install --only=production
 EXPOSE 8004
 
 # Start the application
+ENTRYPOINT ["./entrypoint.sh"]
 CMD ["node", "dist/src/server.js"]
