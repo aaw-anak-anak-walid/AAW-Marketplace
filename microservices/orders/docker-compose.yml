@@ -1,9 +1,11 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # Node.js application service
   microservice:
     build: .
+    ports:
+      - "8001:8001"
     environment:
       - TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
       - ADMIN_TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
@@ -13,8 +15,6 @@ services:
       - PRODUCT_MS_URL=http://host.docker.internal:8002
       - DB_HOST=db
       - DB_PORT=5432
-    ports:
-      - "8001:8001"
     depends_on:
       db:
         condition: service_healthy

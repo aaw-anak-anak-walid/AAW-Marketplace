@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import axios from 'axios';
-
+import axios from "axios";
 
 export const verifyTenant = async (
   req: Request,
@@ -17,11 +16,14 @@ export const verifyTenant = async (
     if (!SERVER_TENANT_ID) {
       return res.status(500).send({ message: "Server Tenant ID not found" });
     }
-    const tenantPayload = await axios.get(`${process.env.TENANT_MS_URL}/tenant/${SERVER_TENANT_ID}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const tenantPayload = await axios.get(
+      `${process.env.TENANT_MS_URL}/tenant/${SERVER_TENANT_ID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     if (tenantPayload.status !== 200) {
       return res.status(500).send({ message: "Server Tenant not found" });
     }
