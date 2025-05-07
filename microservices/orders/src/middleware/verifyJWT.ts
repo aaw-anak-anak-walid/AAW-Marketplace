@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import axios from 'axios';
+import axios from "axios";
 
 export const verifyJWT = async (
   req: Request,
@@ -12,7 +12,10 @@ export const verifyJWT = async (
       return res.status(401).send({ message: "Invalid token" });
     }
 
-    const payload = await axios.post(`${process.env.AUTH_MS_URL}/user/verify-token`, { token });
+    const payload = await axios.post(
+      `${process.env.AUTH_MS_URL}/user/verify-token`,
+      { token }
+    );
     if (payload.status !== 200) {
       return res.status(401).send({ message: "Invalid token" });
     }
