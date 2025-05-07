@@ -2,7 +2,8 @@ import express from "express";
 import { validate } from "@src/middleware/validate";
 import * as Validation from "./validation";
 import * as Handler from "./product.handler";
-import { verifyJWT } from "@src/middleware/verifyJWT";
+import { verifyAdminJWT } from "@src/middleware/verifyAdminJWT";
+import { verifyTenant } from "@src/middleware/verifyTenant";
 
 const router = express.Router();
 
@@ -33,37 +34,43 @@ router.get(
 );
 router.post(
   "",
-  verifyJWT,
+  verifyAdminJWT,
+  verifyTenant,
   validate(Validation.createProductSchema),
   Handler.createProductHandler
 );
 router.post(
   "/category",
-  verifyJWT,
+  verifyAdminJWT,
+  verifyTenant,
   validate(Validation.createCategorySchema),
   Handler.createCategoryHandler
 );
 router.put(
   "/:id",
-  verifyJWT,
+  verifyAdminJWT,
+  verifyTenant,
   validate(Validation.editProductSchema),
   Handler.editProductHandler
 );
 router.put(
   "/category/:category_id",
-  verifyJWT,
+  verifyAdminJWT,
+  verifyTenant,
   validate(Validation.editCategorySchema),
   Handler.editCategoryHandler
 );
 router.delete(
   "/:id",
-  verifyJWT,
+  verifyAdminJWT,
+  verifyTenant,
   validate(Validation.deleteProductSchema),
   Handler.deleteProductHandler
 );
 router.delete(
   "/category/:category_id",
-  verifyJWT,
+  verifyAdminJWT,
+  verifyTenant,
   validate(Validation.deleteCategorySchema),
   Handler.deleteCategoryHandler
 );
