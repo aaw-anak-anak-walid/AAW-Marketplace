@@ -33,6 +33,7 @@
 		"@types/jsonwebtoken": "^9.0.9",
 		"@types/node": "^20.11.24",
 		"@types/pg": "^8.11.2",
+		"@types/qs": "^6.9.18",
 		"@types/uuid": "^9.0.8",
 		"drizzle-kit": "^0.20.14",
 		"nodemon": "^3.1.0",
