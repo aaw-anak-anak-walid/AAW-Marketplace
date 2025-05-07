@@ -4,7 +4,9 @@ import {
   InternalServerErrorResponse,
   NotFoundResponse,
 } from "@src/commons/patterns";
-import axios, { AxiosResponse } from "axios";
+import axios from "@src/utils/axios";
+import type { AxiosResponse } from "axios";
+import { withRetry } from "@src/utils/retry";
 import { Product } from "@type/product";
 import { User } from "@type/user";
 
@@ -37,11 +39,10 @@ export const placeOrderService = async (
     }
 
     // 2) Fetch *all* cart items in one go by asking for a huge limit
-    const cartResponse = await getAllCartItemsService(user, 1, 1_000_000);
-    if (cartResponse.status !== 200) {
-      // Propagate service‐level errors (e.g. Tenant ID missing)
-      return cartResponse;
-    }
+    const cartResponse = await withRetry(() =>
+      getAllCartItemsService(user, 1, 1_000_000)
+    );
+    if (cartResponse.status !== 200) return cartResponse;
 
     // 3) Narrow the union so TS knows you have cartItems[]
     const data = cartResponse.data;
@@ -56,32 +57,32 @@ export const placeOrderService = async (
       return new BadRequestResponse("Cart is empty").generate();
     }
 
-    // 5) Now map out the product IDs (annotate `item` so it's not an implicit `any`)
-    const productIds = cartItems.map((item: any) => item.product_id);
-
-    // 6) Fetch product details
     const products: AxiosResponse<Product[]> = await axios.post(
       `${process.env.PRODUCT_MS_URL}/product/many`,
-      { productIds }
+      { productIds: cartItems.map((item) => item.product_id) }
     );
     if (products.status !== 200) {
       return new InternalServerErrorResponse(
         "Failed to get products"
       ).generate();
     }
+    const userId = user.id;
 
+    console.log("ini user.id: ", user.id);
     // 7) Finally create the order
-    const order = await createOrder(
-      SERVER_TENANT_ID,
-      user.id,
-      cartItems,
-      products.data,
-      shipping_provider as
-        | "JNE"
-        | "TIKI"
-        | "SICEPAT"
-        | "GOSEND"
-        | "GRAB_EXPRESS"
+    const order = await withRetry(() =>
+      createOrder(
+        SERVER_TENANT_ID,
+        userId,
+        cartItems,
+        products.data,
+        shipping_provider as
+          | "JNE"
+          | "TIKI"
+          | "SICEPAT"
+          | "GOSEND"
+          | "GRAB_EXPRESS"
+      )
     );
 
     return {

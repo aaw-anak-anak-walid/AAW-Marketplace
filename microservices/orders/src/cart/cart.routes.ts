@@ -8,26 +8,26 @@ const router = express.Router();
 
 router.get(
   "",
-  verifyJWT,
   validate(Validation.paginationQuerySchema),
+  verifyJWT,
   Handler.getAllCartItemsHandler
 );
 router.post(
   "",
-  verifyJWT,
   validate(Validation.addItemToCartSchema),
+  verifyJWT,
   Handler.addItemToCartHandler
 );
 router.put(
   "",
-  verifyJWT,
   validate(Validation.editCartItemSchema),
+  verifyJWT,
   Handler.editCartItemHandler
 );
 router.delete(
   "",
-  verifyJWT,
   validate(Validation.deleteCartItemSchema),
+  verifyJWT,
   Handler.deleteCartItemHandler
 );
 
