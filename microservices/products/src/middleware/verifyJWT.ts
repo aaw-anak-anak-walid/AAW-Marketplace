@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import axios from 'axios';
+import axios from "axios";
 
 export const verifyJWT = async (
   req: Request,
@@ -12,7 +12,10 @@ export const verifyJWT = async (
       return res.status(401).send({ message: "Invalid token" });
     }
 
-    const payload = await axios.post(`${process.env.AUTH_MS_URL}/user/verify-admin-token`, { token });
+    const payload = await axios.post(
+      `${process.env.AUTH_MS_URL}/user/verify-admin-token`,
+      { token }
+    );
     if (payload.status !== 200) {
       return res.status(401).send({ message: "Invalid token" });
     }
@@ -20,12 +23,15 @@ export const verifyJWT = async (
     const SERVER_TENANT_ID = process.env.TENANT_ID;
     if (!SERVER_TENANT_ID) {
       return res.status(500).send({ message: "Server Tenant ID not found" });
-  }
-    const tenantPayload = await axios.get(`${process.env.TENANT_MS_URL}/tenant/${SERVER_TENANT_ID}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    }
+    const tenantPayload = await axios.get(
+      `${process.env.TENANT_MS_URL}/tenant/${SERVER_TENANT_ID}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     if (tenantPayload.status !== 200) {
       return res.status(500).send({ message: "Server Tenant not found" });
     }
@@ -38,6 +44,7 @@ export const verifyJWT = async (
     req.body.user = payload.data.user;
     next();
   } catch (error) {
+    console.log("ini error: ", error);
     return res.status(401).send({ message: "Invalid token" });
   }
 };
