@@ -8,12 +8,13 @@
     "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
     "build": "tsc && tsc-alias",
     "generate": "drizzle-kit generate:pg",
-		"migrate": "drizzle-kit push:pg"
+    "migrate": "drizzle-kit push:pg"
   },
   "keywords": [],
   "author": "Vincent Suryakim",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^9.7.0",
     "axios": "^1.6.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

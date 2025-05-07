@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs';
 
 import { getUserByUsername } from "./user/dao/getUserByUsername.dao";
 import { NewUser, User } from "@db/schema/users";
-import { registerService } from "./user/services";
 import { insertNewUser } from "./user/dao/insertNewUser.dao";
 
 export const GenerateAdminToken = async (
