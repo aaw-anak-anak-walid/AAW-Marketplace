@@ -11,7 +11,11 @@ router.get(
   validate(Validation.paginationProductSchema),
   Handler.getAllProductsHandler
 );
-router.get("/category", Handler.getAllCategoryHandler);
+router.get(
+  "/category",
+  validate(Validation.paginationProductSchema),
+  Handler.getAllCategoryHandler
+);
 router.get(
   "/:id",
   validate(Validation.getProductByIdSchema),

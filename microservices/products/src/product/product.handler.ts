@@ -48,8 +48,12 @@ export const createProductHandler = async (req: Request, res: Response) => {
   return res.status(response.status).send(response.data);
 };
 
-export const getAllCategoryHandler = async (req: Request, res: Response) => {
-  const response = await Service.getAllCategoriesService();
+export const getAllCategoryHandler = async (
+  req: PaginatedReq,
+  res: Response
+) => {
+  const { page, limit } = req.query;
+  const response = await Service.getAllCategoriesService(page, limit);
   return res.status(response.status).send(response.data);
 };
 
