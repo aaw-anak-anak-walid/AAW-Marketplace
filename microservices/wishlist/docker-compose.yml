@@ -6,7 +6,9 @@ services:
     build: .
     environment:
       - TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
-      - AUTH_MS_URL=http://host.docker.internal:8000
+      - ADMIN_TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
+      - JWT_SECRET=auth_ms_jwt_secret
+      - ADMIN_JWT_SECRET=admin_auth_ms_jwt_secret
       - DB_HOST=db
       - DB_PORT=5432
     ports:
@@ -23,7 +25,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5429:5432"
+      - "5004:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
