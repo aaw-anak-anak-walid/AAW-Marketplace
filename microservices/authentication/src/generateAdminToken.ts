@@ -66,7 +66,8 @@ const registerAdmin = async (username: string, email: string, password: string, 
         password: hashedPassword,
         full_name,
         address,
-        phone_number
+        phone_number,
+        is_admin: true,
     }
 
     const newUser = await insertNewUser(userData)
