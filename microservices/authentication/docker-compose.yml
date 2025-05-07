@@ -9,6 +9,7 @@ services:
     environment:
       - TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
       - ADMIN_TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
+      - ADMIN_JWT_SECRET=admin_ms_jwt_secret
       - JWT_SECRET=auth_ms_jwt_secret
       - ADMIN_JWT_SECRET=admin_auth_ms_jwt_secret
       - DB_HOST=db
