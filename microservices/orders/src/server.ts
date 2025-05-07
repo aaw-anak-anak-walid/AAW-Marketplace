@@ -7,6 +7,7 @@ import express_prom_bundle from "express-prom-bundle";
 
 import orderRoutes from "./order/order.routes";
 import cartRoutes from "./cart/cart.routes";
+import { initRedis } from "./db/redis";
 
 const metricsMiddleware = express_prom_bundle({
   includeMethod: true,
@@ -19,6 +20,8 @@ const app = express();
 app.use(metricsMiddleware);
 app.use(cors());
 app.use(express.json());
+
+initRedis();
 
 app.use('/order', orderRoutes);
 app.use('/cart', cartRoutes);

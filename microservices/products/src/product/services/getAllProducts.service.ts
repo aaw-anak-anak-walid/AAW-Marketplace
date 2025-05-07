@@ -1,6 +1,11 @@
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getAllProductsByTenantId } from "../dao/getAllProductsByTenantId.dao";
 import { withRetry } from "../../utils/withRetry";
+import {
+  getFromCache,
+  saveToCache,
+  productCache,
+} from "@src/commons/utils/redis";
 
 export const getAllProductsService = async (page: number, limit: number) => {
   try {
@@ -11,6 +16,16 @@ export const getAllProductsService = async (page: number, limit: number) => {
       ).generate();
     }
 
+    const cacheKey = productCache.listKey(SERVER_TENANT_ID, page, limit);
+    const cachedData = await getFromCache<any>(cacheKey);
+
+    if (cachedData) {
+      return {
+        status: 200,
+        data: cachedData,
+      };
+    }
+
     const offset = (page - 1) * limit;
 
     // Now calling the DAO with limit & offset
@@ -19,17 +34,21 @@ export const getAllProductsService = async (page: number, limit: number) => {
       getAllProductsByTenantId(SERVER_TENANT_ID, limit, offset)
     );
 
+    const responseData = {
+      products,
+      meta: {
+        totalItems: total,
+        page,
+        perPage: limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+
+    await saveToCache(cacheKey, responseData);
+
     return {
       status: 200,
-      data: {
-        products,
-        meta: {
-          totalItems: total,
-          page,
-          perPage: limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
+      data: responseData,
     };
   } catch (err: any) {
     return new InternalServerErrorResponse(err).generate();

@@ -10,9 +10,10 @@ import { withRetry } from "@src/utils/retry";
 import { Product } from "@type/product";
 import { User } from "@type/user";
 
-// 1) Import the cart *service*, not the DAO
+// Import cart service and cache utilities
 import { getAllCartItemsService } from "../../cart/services/getAllCartItems.service";
 import { createOrder } from "../dao/createOrder.dao";
+import { orderCache, cartCache } from "@src/commons/utils/redis";
 
 export const placeOrderService = async (
   user: User,
@@ -44,7 +45,7 @@ export const placeOrderService = async (
     );
     if (cartResponse.status !== 200) return cartResponse;
 
-    // 3) Narrow the union so TS knows you have cartItems[]
+    // Narrow the union so TS knows you have cartItems[]
     const data = cartResponse.data;
     if (!("cartItems" in data)) {
       // Shouldn't happen in the 200 case, but guard defensively
@@ -52,7 +53,7 @@ export const placeOrderService = async (
     }
     const cartItems = data.cartItems;
 
-    // 4) Check for empty cart
+    // Check for empty cart
     if (cartItems.length === 0) {
       return new BadRequestResponse("Cart is empty").generate();
     }
@@ -68,7 +69,6 @@ export const placeOrderService = async (
     }
     const userId = user.id;
 
-    console.log("ini user.id: ", user.id);
     // 7) Finally create the order
     const order = await withRetry(() =>
       createOrder(
@@ -84,6 +84,12 @@ export const placeOrderService = async (
           | "GRAB_EXPRESS"
       )
     );
+
+    // Invalidate user's order list cache because a new order was created
+    await orderCache.invalidateOrderList(user.id);
+
+    // Invalidate user's cart cache because the cart will be cleared
+    await cartCache.invalidateCart(user.id);
 
     return {
       status: 201,

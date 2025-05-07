@@ -1,6 +1,12 @@
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getProductById } from "../dao/getProductById.dao";
 import { withRetry } from "../../utils/withRetry";
+import {
+  getFromCache,
+  saveToCache,
+  productCache,
+  DEFAULT_TTL,
+} from "@src/commons/utils/redis";
 
 export const getProductByIdService = async (id: string) => {
   try {
@@ -11,15 +17,26 @@ export const getProductByIdService = async (id: string) => {
       ).generate();
     }
 
-    const products = await withRetry(() =>
-      getProductById(SERVER_TENANT_ID, id)
-    );
+    // Try to get from cache first
+    const cacheKey = productCache.detailKey(SERVER_TENANT_ID, id);
+    const cachedProduct = await getFromCache<any>(cacheKey);
+
+    if (cachedProduct) {
+      return {
+        data: cachedProduct,
+        status: 200,
+      };
+    }
+
+    const product = await withRetry(() => getProductById(SERVER_TENANT_ID, id));
+
+    if (product) {
+      await saveToCache(cacheKey, product, DEFAULT_TTL.PRODUCT_DETAILS);
+    }
 
     return {
-      data: {
-        ...products,
-      },
-      status: 200,
+      data: product ? { ...product } : null,
+      status: product ? 200 : 404,
     };
   } catch (err: any) {
     return new InternalServerErrorResponse(err).generate();
