@@ -1,6 +1,7 @@
 // src/services/category.service.ts
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getAllCategoriesByTenantId } from "../dao/getAllCategoriesByTenantId.dao";
+import { withRetry } from "../../utils/withRetry";
 
 export const getAllCategoriesService = async (page: number, limit: number) => {
   try {
@@ -14,10 +15,8 @@ export const getAllCategoriesService = async (page: number, limit: number) => {
     const offset = (page - 1) * limit;
 
     // now the DAO returns { items, total }
-    const { items: categories, total } = await getAllCategoriesByTenantId(
-      SERVER_TENANT_ID,
-      limit,
-      offset
+    const { items: categories, total } = await withRetry(() =>
+      getAllCategoriesByTenantId(SERVER_TENANT_ID, limit, offset)
     );
 
     return {

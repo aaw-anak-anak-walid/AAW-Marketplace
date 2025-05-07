@@ -1,5 +1,6 @@
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getAllProductsByTenantId } from "../dao/getAllProductsByTenantId.dao";
+import { withRetry } from "../../utils/withRetry";
 
 export const getAllProductsService = async (page: number, limit: number) => {
   try {
@@ -14,10 +15,8 @@ export const getAllProductsService = async (page: number, limit: number) => {
 
     // Now calling the DAO with limit & offset
     // (your DAO will need to accept these params and return { items, total })
-    const { items: products, total } = await getAllProductsByTenantId(
-      SERVER_TENANT_ID,
-      limit,
-      offset
+    const { items: products, total } = await withRetry(() =>
+      getAllProductsByTenantId(SERVER_TENANT_ID, limit, offset)
     );
 
     return {
