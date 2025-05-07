@@ -8,9 +8,10 @@ import axios, { AxiosResponse } from "axios";
 import { Product } from "@type/product";
 import { User } from "@type/user";
 
-// 1) Import the cart *service*, not the DAO
+// Import cart service and cache utilities
 import { getAllCartItemsService } from "../../cart/services/getAllCartItems.service";
 import { createOrder } from "../dao/createOrder.dao";
+import { orderCache, cartCache } from "@src/commons/utils/redis";
 
 export const placeOrderService = async (
   user: User,
@@ -36,14 +37,14 @@ export const placeOrderService = async (
       return new InternalServerErrorResponse("User id not found").generate();
     }
 
-    // 2) Fetch *all* cart items in one go by asking for a huge limit
+    // Fetch *all* cart items in one go by asking for a huge limit
     const cartResponse = await getAllCartItemsService(user, 1, 1_000_000);
     if (cartResponse.status !== 200) {
       // Propagate service‐level errors (e.g. Tenant ID missing)
       return cartResponse;
     }
 
-    // 3) Narrow the union so TS knows you have cartItems[]
+    // Narrow the union so TS knows you have cartItems[]
     const data = cartResponse.data;
     if (!("cartItems" in data)) {
       // Shouldn't happen in the 200 case, but guard defensively
@@ -51,15 +52,15 @@ export const placeOrderService = async (
     }
     const cartItems = data.cartItems;
 
-    // 4) Check for empty cart
+    // Check for empty cart
     if (cartItems.length === 0) {
       return new BadRequestResponse("Cart is empty").generate();
     }
 
-    // 5) Now map out the product IDs (annotate `item` so it's not an implicit `any`)
+    // Map out the product IDs
     const productIds = cartItems.map((item: any) => item.product_id);
 
-    // 6) Fetch product details
+    // Fetch product details
     const products: AxiosResponse<Product[]> = await axios.post(
       `${process.env.PRODUCT_MS_URL}/product/many`,
       { productIds }
@@ -70,7 +71,7 @@ export const placeOrderService = async (
       ).generate();
     }
 
-    // 7) Finally create the order
+    // Create the order
     const order = await createOrder(
       SERVER_TENANT_ID,
       user.id,
@@ -83,6 +84,12 @@ export const placeOrderService = async (
         | "GOSEND"
         | "GRAB_EXPRESS"
     );
+
+    // Invalidate user's order list cache because a new order was created
+    await orderCache.invalidateOrderList(user.id);
+
+    // Invalidate user's cart cache because the cart will be cleared
+    await cartCache.invalidateCart(user.id);
 
     return {
       status: 201,

@@ -2,6 +2,12 @@
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getAllOrders } from "../dao/getAllOrders.dao";
 import { User } from "@type/user";
+import {
+  getFromCache,
+  saveToCache,
+  orderCache,
+  DEFAULT_TTL,
+} from "@src/commons/utils/redis";
 
 export const getAllOrdersService = async (
   user: User,
@@ -20,6 +26,17 @@ export const getAllOrdersService = async (
       ).generate();
     }
 
+    // Try to get from cache first
+    const cacheKey = orderCache.listKey(user.id, page, limit);
+    const cachedData = await getFromCache<any>(cacheKey);
+
+    if (cachedData) {
+      return {
+        status: 200,
+        data: cachedData,
+      };
+    }
+
     const offset = (page - 1) * limit;
 
     // DAO now returns { items, total }
@@ -30,17 +47,22 @@ export const getAllOrdersService = async (
       offset
     );
 
+    const responseData = {
+      orders,
+      meta: {
+        totalItems: total,
+        page,
+        perPage: limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+
+    // Save to cache
+    await saveToCache(cacheKey, responseData, DEFAULT_TTL.ORDERS);
+
     return {
       status: 200,
-      data: {
-        orders,
-        meta: {
-          totalItems: total,
-          page,
-          perPage: limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
+      data: responseData,
     };
   } catch (err: any) {
     return new InternalServerErrorResponse(err).generate();

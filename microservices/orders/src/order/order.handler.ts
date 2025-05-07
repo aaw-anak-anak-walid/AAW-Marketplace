@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
 import * as Service from "./services";
 
-export const getAllOrdersHandler = async (req: Request, res: Response) => {
-  const { page, limit } = req.query as unknown as {
-    page: number;
-    limit: number;
-  };
+type PaginatedReq = Request<{}, any, any, any, { page: number; limit: number }>;
+
+export const getAllOrdersHandler = async (req: PaginatedReq, res: Response) => {
+  const { page, limit } = req.query;
   const { user } = req.body;
   const response = await Service.getAllOrdersService(user, page, limit);
   return res.status(response.status).send(response.data);

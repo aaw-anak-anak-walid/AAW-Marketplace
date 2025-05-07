@@ -7,31 +7,38 @@ import { verifyTenant } from "@src/middleware/verifyTenant";
 
 const router = express.Router();
 
+// GET routes (using service-level caching)
 router.get(
   "",
   validate(Validation.paginationProductSchema),
   Handler.getAllProductsHandler
 );
+
 router.get(
   "/category",
   validate(Validation.paginationProductSchema),
   Handler.getAllCategoryHandler
 );
+
 router.get(
   "/:id",
   validate(Validation.getProductByIdSchema),
   Handler.getProductByIdHandler
 );
+
 router.post(
   "/many",
   validate(Validation.getManyProductDatasByIdSchema),
   Handler.getManyProductDatasByIdHandler
 );
+
 router.get(
   "/category/:category_id",
   validate(Validation.getProductByCategorySchema),
   Handler.getProductByCategoryHandler
 );
+
+// POST, PUT, DELETE endpoints (with cache invalidation in services)
 router.post(
   "",
   verifyAdminJWT,
@@ -39,6 +46,7 @@ router.post(
   validate(Validation.createProductSchema),
   Handler.createProductHandler
 );
+
 router.post(
   "/category",
   verifyAdminJWT,
@@ -46,6 +54,7 @@ router.post(
   validate(Validation.createCategorySchema),
   Handler.createCategoryHandler
 );
+
 router.put(
   "/:id",
   verifyAdminJWT,
@@ -53,6 +62,7 @@ router.put(
   validate(Validation.editProductSchema),
   Handler.editProductHandler
 );
+
 router.put(
   "/category/:category_id",
   verifyAdminJWT,
@@ -60,6 +70,7 @@ router.put(
   validate(Validation.editCategorySchema),
   Handler.editCategoryHandler
 );
+
 router.delete(
   "/:id",
   verifyAdminJWT,
@@ -67,6 +78,7 @@ router.delete(
   validate(Validation.deleteProductSchema),
   Handler.deleteProductHandler
 );
+
 router.delete(
   "/category/:category_id",
   verifyAdminJWT,

@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # Node.js application service
@@ -12,11 +12,16 @@ services:
       - TENANT_MS_URL=http://host.docker.internal:8003
       - DB_HOST=db
       - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379
     ports:
       - "8002:8002"
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - products_network
 
   # PostgreSQL database service
   db:
@@ -27,8 +32,36 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5002:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - products_network
+
+  # Redis service
+  redis:
+    image: redis:alpine
+    ports:
+      - "6002:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - products_network
+
+networks:
+  products_network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  postgres_data:

@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import * as Service from "./services";
 type PaginatedReq = Request<{}, any, any, { page: number; limit: number }>;
+type PaginatedCategoryReq = Request<
+  { category_id: string },
+  any,
+  any,
+  { page: number; limit: number }>;
 
 export const getAllProductsHandler = async (
   req: PaginatedReq,
@@ -27,11 +32,12 @@ export const getProductByIdHandler = async (req: Request, res: Response) => {
 };
 
 export const getProductByCategoryHandler = async (
-  req: Request,
+  req: PaginatedCategoryReq,
   res: Response
 ) => {
   const { category_id } = req.params;
-  const response = await Service.getProductByCategoryService(category_id);
+  const { page, limit } = req.query;
+  const response = await Service.getProductByCategoryService(category_id, page, limit);
   return res.status(response.status).send(response.data);
 };
 

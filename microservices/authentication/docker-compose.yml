@@ -17,6 +17,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - auth_network
 
   # PostgreSQL database service
   db:
@@ -27,8 +29,19 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5000:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - auth_network
+
+volumes:
+  db_data:
+
+networks:
+  auth_network:
+    driver: bridge
