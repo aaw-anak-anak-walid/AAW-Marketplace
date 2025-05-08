@@ -6,45 +6,77 @@ import { withRetry } from "@src/utils/retry";
 import {
   InternalServerErrorResponse,
   NotFoundResponse,
+  UnauthorizedResponse,
 } from "@src/commons/patterns";
 import { User } from "@db/schema/users";
+import logger from '@src/config/logger';
 
-export const loginService = async (username: string, password: string) => {
+const COMPONENT_NAME = "LoginService";
+
+export const loginService = async (username: string, passwordInput: string) => {
+
   try {
     const SERVER_TENANT_ID = process.env.TENANT_ID;
     if (!SERVER_TENANT_ID) {
+      logger.error("Server tenant ID (TENANT_ID) is missing. Cannot proceed with login.", { component: COMPONENT_NAME, username });
       return new InternalServerErrorResponse(
         "Server tenant ID is missing"
       ).generate();
     }
-    const user: User = await withRetry(() =>
+
+    const user: User | undefined = await withRetry(() =>
       getUserByUsername(username, SERVER_TENANT_ID)
     );
+
     if (!user) {
-      return new NotFoundResponse("User not found").generate();
+      logger.warn(`User not found in database for login attempt`, { username, tenantId: SERVER_TENANT_ID, component: COMPONENT_NAME });
+      return new NotFoundResponse("Invalid username or password.").generate();
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    const isPasswordValid = await bcrypt.compare(passwordInput, user.password);
     if (!isPasswordValid) {
-      return new NotFoundResponse("Invalid password").generate();
+      logger.warn(`Invalid password attempt for user`, { userId: user.id, username, component: COMPONENT_NAME });
+      return new UnauthorizedResponse("Invalid username or password.").generate();
     }
+
 
     const payload = {
       id: user.id,
       tenant_id: user.tenant_id,
+      username: user.username,
     };
     const secret: string = process.env.JWT_SECRET as string;
+    if (!secret) {
+      logger.error("JWT_SECRET is not configured. Cannot sign token.", { component: COMPONENT_NAME, userId: user.id, username });
+
+      return new InternalServerErrorResponse("JWT configuration error.").generate();
+    }
+
+
     const token = jwt.sign(payload, secret, {
       expiresIn: "1d",
     });
+    logger.info(`Login successful, token generated`, { userId: user.id, username, component: COMPONENT_NAME });
 
     return {
       data: {
         token,
+        userId: user.id,
+        username: user.username,
       },
       status: 200,
     };
   } catch (err: any) {
+
+    logger.error(`Unexpected error during login process`, {
+      username,
+      errorMessage: err.message,
+      errorName: err.name,
+      stack: err.stack,
+      component: COMPONENT_NAME
+    });
+
     return new InternalServerErrorResponse(err).generate();
   }
 };
