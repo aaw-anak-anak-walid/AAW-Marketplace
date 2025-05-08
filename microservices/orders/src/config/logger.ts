@@ -13,6 +13,9 @@ const logLevels = {
 
 const getCurrentLevel = (): string => {
   const env = process.env.NODE_ENV || 'development';
+  if (process.env.LOG_LEVEL_WORKLOAD_TEST) {
+    return process.env.LOG_LEVEL_WORKLOAD_TEST; // e.g., 'warn'
+  }
   return env === 'development' ? 'debug' : 'info';
 };
 
@@ -55,24 +58,33 @@ const developmentConsoleFormat = winston.format.combine(
   )
 );
 
-const consoleFormat = process.env.NODE_ENV === 'production' ? structuredLogFormat : developmentConsoleFormat;
 
-const loggerTransports: winston.transport[] = [
-  new winston.transports.Console({
-    format: consoleFormat,
-    level: getCurrentLevel(),
-  }),
-  new winston.transports.File({
-    filename: path.join(__dirname, '../../logs/all-structured.log'),
-    format: structuredLogFormat,
-    level: 'info',
-  }),
-  new winston.transports.File({
-    filename: path.join(__dirname, '../../logs/error-structured.log'),
-    format: structuredLogFormat,
-    level: 'error',
-  }),
-];
+const loggerTransports: winston.transport[] = [];
+
+const env = process.env.NODE_ENV || 'development';
+
+if (env === 'development') {
+  loggerTransports.push(
+    new winston.transports.Console({
+      format: developmentConsoleFormat,
+      level: getCurrentLevel(),
+    })
+  );
+  loggerTransports.push(
+    new winston.transports.File({
+      filename: path.join(__dirname, '../../logs/app-dev.log'),
+      format: structuredLogFormat,
+      level: getCurrentLevel(),
+    })
+  );
+} else {
+  loggerTransports.push(
+    new winston.transports.Console({
+      format: structuredLogFormat,
+      level: getCurrentLevel(),
+    })
+  );
+}
 
 const logger = winston.createLogger({
   level: getCurrentLevel(),

@@ -7,6 +7,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - NODE_ENV=production
       - TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
       - ADMIN_TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
       - ADMIN_JWT_SECRET=admin_ms_jwt_secret
@@ -14,11 +15,20 @@ services:
       - ADMIN_JWT_SECRET=admin_auth_ms_jwt_secret
       - DB_HOST=db
       - DB_PORT=5432
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "fluent-bit-central:24224" # Service name of central Fluent Bit
+        tag: "auth.service.{{.Name}}.{{.ID}}"      # Custom tag for these logs
+        fluentd-async-connect: "true"
+        fluentd-retry-wait: "1s"
+        fluentd-max-retries: "30"
     depends_on:
       db:
         condition: service_healthy
     networks:
       - auth_network
+      - shared_logging_network 
 
   # PostgreSQL database service
   db:
@@ -45,3 +55,5 @@ volumes:
 networks:
   auth_network:
     driver: bridge
+  shared_logging_network:
+    external: true

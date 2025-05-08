@@ -5,6 +5,7 @@ services:
   microservice:
     build: .
     environment:
+      - NODE_ENV=production
       - TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
       - ADMIN_TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
       - JWT_SECRET=auth_ms_jwt_secret
@@ -15,6 +16,14 @@ services:
       - REDIS_URL=redis://redis:6379
     ports:
       - "8002:8002"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "fluent-bit-central:24224" # Service name of central Fluent Bit
+        tag: "products.service.{{.Name}}.{{.ID}}"      # Custom tag for these logs
+        fluentd-async-connect: "true"
+        fluentd-retry-wait: "1s"
+        fluentd-max-retries: "30"
     depends_on:
       db:
         condition: service_healthy
@@ -22,6 +31,7 @@ services:
         condition: service_started
     networks:
       - products_network
+      - shared_logging_network 
 
   # PostgreSQL database service
   db:
@@ -61,6 +71,8 @@ services:
 networks:
   products_network:
     driver: bridge
+  shared_logging_network:
+    external: true
 
 volumes:
   redis_data:
