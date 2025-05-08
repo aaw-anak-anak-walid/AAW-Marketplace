@@ -41,49 +41,49 @@ router.get(
 // POST, PUT, DELETE endpoints (with cache invalidation in services)
 router.post(
   "",
+  validate(Validation.createProductSchema),
   verifyAdminJWT,
   verifyTenant,
-  validate(Validation.createProductSchema),
   Handler.createProductHandler
 );
 
 router.post(
   "/category",
+  validate(Validation.createCategorySchema),
   verifyAdminJWT,
   verifyTenant,
-  validate(Validation.createCategorySchema),
   Handler.createCategoryHandler
 );
 
 router.put(
   "/:id",
+  validate(Validation.editProductSchema),
   verifyAdminJWT,
   verifyTenant,
-  validate(Validation.editProductSchema),
   Handler.editProductHandler
 );
 
 router.put(
   "/category/:category_id",
+  validate(Validation.editCategorySchema),
   verifyAdminJWT,
   verifyTenant,
-  validate(Validation.editCategorySchema),
   Handler.editCategoryHandler
 );
 
 router.delete(
   "/:id",
+  validate(Validation.deleteProductSchema),
   verifyAdminJWT,
   verifyTenant,
-  validate(Validation.deleteProductSchema),
   Handler.deleteProductHandler
 );
 
 router.delete(
   "/category/:category_id",
+  validate(Validation.deleteCategorySchema),
   verifyAdminJWT,
   verifyTenant,
-  validate(Validation.deleteCategorySchema),
   Handler.deleteCategoryHandler
 );
 

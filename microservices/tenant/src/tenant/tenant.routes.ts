@@ -8,26 +8,26 @@ const router = express.Router();
 
 router.get(
   "/:tenant_id",
-  verifyAdminJWT,
   validate(Validation.getTenantSchema),
+  verifyAdminJWT,
   Handler.getTenantHandler
 );
 router.post(
   "",
-  verifyAdminJWT,
   validate(Validation.createTenantSchema),
+  verifyAdminJWT,
   Handler.createTenantHandler
 );
 router.put(
   "/:old_tenant_id",
-  verifyAdminJWT,
   validate(Validation.editTenantSchema),
+  verifyAdminJWT,
   Handler.editTenantHandler
 );
 router.delete(
   "",
-  verifyAdminJWT,
   validate(Validation.deleteTenantSchema),
+  verifyAdminJWT,
   Handler.deleteTenantHandler
 );
 
