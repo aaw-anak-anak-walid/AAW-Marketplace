@@ -92,7 +92,7 @@ const logger = winston.createLogger({
   format: structuredLogFormat,
   transports: loggerTransports,
   exitOnError: false,
-  defaultMeta: { service: 'authentication-service' },
+  defaultMeta: { service: 'order-service' },
 });
 
 export const morganStream = {
