@@ -1,21 +1,21 @@
-// src/middleware/validate.ts
 import { z, ZodObject, ZodRawShape } from "zod";
 import { RequestHandler, Request, Response, NextFunction } from "express";
 import type { ParsedQs } from "qs";
+import logger from "@src/config/logger";
+
+const COMPONENT_NAME = "ValidationMiddleware";
+
 export function validate<S extends ZodObject<ZodRawShape>>(
   schema: S
 ): RequestHandler<
-  // params
   "params" extends keyof S["shape"] ? z.infer<S["shape"]["params"]> : {},
   any,
-  // body
   "body" extends keyof S["shape"] ? z.infer<S["shape"]["body"]> : {},
-  // query: now we intersect with ParsedQs so it always extends it
   "query" extends keyof S["shape"]
-    ? z.infer<S["shape"]["query"]> & ParsedQs
-    : ParsedQs
+  ? z.infer<S["shape"]["query"]> & ParsedQs
+  : ParsedQs
 > {
-  return async (req, res, next) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await schema.parseAsync({
         body: req.body,
@@ -28,14 +28,29 @@ export function validate<S extends ZodObject<ZodRawShape>>(
       if (result.params) req.params = result.params;
 
       return next();
-    } catch (err) {
+    } catch (err: any) {
       if (err instanceof z.ZodError) {
+        logger.info("Request validation failed", {
+          originalUrl: req.originalUrl,
+          method: req.method,
+          errors: err.issues.map(issue => ({ path: issue.path.join('.'), message: issue.message })),
+          ip: req.ip,
+          component: COMPONENT_NAME
+        });
         return res.status(400).json({
           message: "Validation errors in your request",
           errors: err.issues,
         });
       }
-      console.error(err);
+      logger.error("Unexpected error during request validation", {
+        originalUrl: req.originalUrl,
+        method: req.method,
+        errorMessage: err.message,
+        errorName: err.name,
+        stack: err.stack,
+        ip: req.ip,
+        component: COMPONENT_NAME
+      });
       return res.status(500).json({ message: "Internal server error" });
     }
   };
