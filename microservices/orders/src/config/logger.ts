@@ -1,7 +1,6 @@
 import winston from 'winston';
 import path from 'path';
 
-
 const logLevels = {
   error: 0,
   warn: 1,
@@ -16,7 +15,6 @@ const getCurrentLevel = (): string => {
   const env = process.env.NODE_ENV || 'development';
   return env === 'development' ? 'debug' : 'info';
 };
-
 
 const structuredLogFormat = winston.format.combine(
   winston.format.timestamp(),
@@ -42,39 +40,39 @@ const developmentConsoleFormat = winston.format.combine(
       }
 
       if (Object.keys(meta).length) {
-        log += ` ${JSON.stringify(meta)}`;
+        const metaString = Object.entries(meta)
+          .map(([key, value]) => {
+            const formattedValue = typeof value === 'string' ? `"${value}"` : (typeof value === 'object' && value !== null ? JSON.stringify(value) : value);
+            return `${key}=${formattedValue}`;
+          })
+          .join(' ');
+        if (metaString) {
+          log += ` ${metaString}`;
+        }
       }
       return log;
     }
   )
 );
 
-
 const consoleFormat = process.env.NODE_ENV === 'production' ? structuredLogFormat : developmentConsoleFormat;
 
-
 const loggerTransports: winston.transport[] = [
-
   new winston.transports.Console({
     format: consoleFormat,
     level: getCurrentLevel(),
   }),
-
-
   new winston.transports.File({
     filename: path.join(__dirname, '../../logs/all-structured.log'),
     format: structuredLogFormat,
     level: 'info',
   }),
-
-
   new winston.transports.File({
     filename: path.join(__dirname, '../../logs/error-structured.log'),
     format: structuredLogFormat,
     level: 'error',
   }),
 ];
-
 
 const logger = winston.createLogger({
   level: getCurrentLevel(),
@@ -85,14 +83,11 @@ const logger = winston.createLogger({
   defaultMeta: { service: 'authentication-service' },
 });
 
-
 export const morganStream = {
   write: (message: string) => {
-
     logger.http(message.trim());
   },
 };
-
 
 if (process.env.NODE_ENV !== 'production') {
   logger.debug('Logging initialized in development mode (debug level active for console)');
