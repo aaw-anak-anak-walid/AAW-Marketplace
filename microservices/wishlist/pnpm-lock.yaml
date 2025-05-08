@@ -1602,7 +1602,7 @@ packages:
   /jws@3.2.2:
     resolution: {integrity: sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==}
     dependencies:
-      jwa: 1.4.1
+      jwa: 1.4.2
       safe-buffer: 5.2.1
     dev: false
 

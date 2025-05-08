@@ -3,9 +3,17 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import promClient from "prom-client";
 import express_prom_bundle from "express-prom-bundle";
 
 import tenantRoutes from './tenant/tenant.routes';
+
+const register = new promClient.Registry();
+
+promClient.collectDefaultMetrics({
+  register,
+  prefix: 'tenant_'
+});
 
 const metricsMiddleware = express_prom_bundle({
   includeMethod: true,
@@ -18,6 +26,11 @@ const app = express();
 app.use(metricsMiddleware);
 app.use(cors());
 app.use(express.json());
+
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
 
 app.use("/tenant", tenantRoutes);
 

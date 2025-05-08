@@ -1,5 +1,6 @@
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getManyProductDatasById } from "../dao/getManyProductDatasById.dao";
+import { withRetry } from "../../utils/withRetry";
 import {
   getFromCache,
   saveToCache,
@@ -32,9 +33,8 @@ export const getManyProductDatasByIdService = async (productIds: string[]) => {
     }
 
     // If not in cache, get from database
-    const products = await getManyProductDatasById(
-      SERVER_TENANT_ID,
-      productIds
+    const products = await withRetry(() =>
+      getManyProductDatasById(SERVER_TENANT_ID, productIds)
     );
 
     // Save to cache

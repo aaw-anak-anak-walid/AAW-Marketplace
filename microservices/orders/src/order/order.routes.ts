@@ -8,20 +8,20 @@ const router = express.Router();
 
 router.get(
   "",
-  verifyJWT,
   validate(Validation.paginationQuerySchema),
+  verifyJWT,
   Handler.getAllOrdersHandler
 );
 router.get(
   "/:orderId",
-  verifyJWT,
   validate(Validation.getOrderDetailSchema),
+  verifyJWT,
   Handler.getOrderDetailHandler
 );
 router.post(
   "",
-  verifyJWT,
   validate(Validation.placeOrderSchema),
+  verifyJWT,
   Handler.placeOrderHandler
 );
 router.post(
@@ -31,8 +31,8 @@ router.post(
 );
 router.post(
   "/:orderId/cancel",
-  verifyJWT,
   validate(Validation.cancelOrderSchema),
+  verifyJWT,
   Handler.cancelOrderHandler
 );
 

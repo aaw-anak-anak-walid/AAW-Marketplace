@@ -1,0 +1,39 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'authentication-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:8000']
+        labels:
+          service: 'authentication'
+
+  - job_name: 'orders-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:8001']
+        labels:
+          service: 'orders'
+
+  - job_name: 'products-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:8002']
+        labels:
+          service: 'products'
+
+  - job_name: 'tenant-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:8003']
+        labels:
+          service: 'tenant'
+
+  - job_name: 'wishlist-service'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['host.docker.internal:8004']
+        labels:
+          service: 'wishlist'
