@@ -6,8 +6,8 @@ import cors from "cors";
 import promClient from "prom-client";
 import express_prom_bundle from "express-prom-bundle";
 
-// Assuming a logger is available, similar to other services. Adjust path if necessary.
-import logger from "./config/logger";
+import morgan from "morgan";
+import logger, { morganStream } from "./config/logger";
 import productRoutes from './product/product.routes'
 import { initRedis } from "./db/redis";
 
@@ -31,6 +31,9 @@ const metricsMiddleware = express_prom_bundle({
 logger.info("Prometheus metrics configured.", { component: COMPONENT_NAME });
 
 const app = express();
+
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { stream: morganStream }));
+
 app.use(metricsMiddleware);
 app.use(cors());
 app.use(express.json());
