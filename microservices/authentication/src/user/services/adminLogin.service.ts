@@ -74,8 +74,6 @@ export const adminLoginService = async (username: string, password: string) => {
     return {
       data: {
         token,
-        userId: user.id,
-        username: user.username,
       },
       status: 200,
     };
