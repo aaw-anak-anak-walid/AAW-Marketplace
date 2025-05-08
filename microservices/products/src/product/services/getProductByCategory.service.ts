@@ -1,5 +1,6 @@
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getProductByCategory } from "../dao/getProductByCategory.dao";
+import { withRetry } from "../../utils/withRetry";
 import {
   getFromCache,
   saveToCache,
@@ -38,7 +39,9 @@ export const getProductByCategoryService = async (
     }
 
     // If not in cache, get from database
-    const products = await getProductByCategory(SERVER_TENANT_ID, category_id);
+    const products = await withRetry(() =>
+      getProductByCategory(SERVER_TENANT_ID, category_id)
+    );
 
     // Prepare response data
     const responseData = {

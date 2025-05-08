@@ -1,6 +1,11 @@
 import { InternalServerErrorResponse } from "@src/commons/patterns";
 import { getAllProductsByTenantId } from "../dao/getAllProductsByTenantId.dao";
-import { getFromCache, saveToCache, productCache } from "@src/commons/utils/redis";
+import { withRetry } from "../../utils/withRetry";
+import {
+  getFromCache,
+  saveToCache,
+  productCache,
+} from "@src/commons/utils/redis";
 
 export const getAllProductsService = async (page: number, limit: number) => {
   try {
@@ -13,19 +18,20 @@ export const getAllProductsService = async (page: number, limit: number) => {
 
     const cacheKey = productCache.listKey(SERVER_TENANT_ID, page, limit);
     const cachedData = await getFromCache<any>(cacheKey);
-    
+
     if (cachedData) {
       return {
         status: 200,
-        data: cachedData
+        data: cachedData,
       };
     }
 
     const offset = (page - 1) * limit;
-    const { items: products, total } = await getAllProductsByTenantId(
-      SERVER_TENANT_ID,
-      limit,
-      offset
+
+    // Now calling the DAO with limit & offset
+    // (your DAO will need to accept these params and return { items, total })
+    const { items: products, total } = await withRetry(() =>
+      getAllProductsByTenantId(SERVER_TENANT_ID, limit, offset)
     );
 
     const responseData = {

@@ -7,44 +7,44 @@ const router = express.Router();
 
 router.get(
   "/",
-  verifyJWT,
   validate(Validation.paginationQuerySchema),
+  verifyJWT,
   Handler.getAllUserWishlistHandler
 );
 router.get(
   "/:id",
-  verifyJWT,
   validate(Validation.getWishlistByIdSchema),
+  verifyJWT,
   Handler.getWishlistByIdHandler
 );
 router.post(
   "/",
-  verifyJWT,
   validate(Validation.createWishlistSchema),
+  verifyJWT,
   Handler.createWishlistHandler
 );
 router.put(
   "/:id",
-  verifyJWT,
   validate(Validation.updateWishlistSchema),
+  verifyJWT,
   Handler.updateWishlistHandler
 );
 router.delete(
   "/remove",
-  verifyJWT,
   validate(Validation.removeProductFromWishlistSchema),
+  verifyJWT,
   Handler.removeProductFromWishlistHandler
 );
 router.delete(
   "/:id",
-  verifyJWT,
   validate(Validation.deleteWishlistSchema),
+  verifyJWT,
   Handler.deleteWishlistHandler
 );
 router.post(
   "/add",
-  verifyJWT,
   validate(Validation.addProductToWishlistSchema),
+  verifyJWT,
   Handler.addProductToWishlistHandler
 );
 
