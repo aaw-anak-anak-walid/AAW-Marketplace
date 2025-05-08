@@ -1,32 +1,40 @@
 import { createClient, RedisClientType } from "redis";
+import logger from "@src/config/logger"; // Assuming logger is configured and exported from this path
 
-// Create Redis client
+const COMPONENT_NAME = "RedisClient";
+
 let redisClient: RedisClientType;
 
-// Initialize Redis client
 export const initRedis = async () => {
+  logger.info("Initializing Redis client connection attempt", { component: COMPONENT_NAME });
   try {
     redisClient = createClient({
       url: process.env.REDIS_URL || "redis://localhost:6379",
     });
 
-    // Set up event handlers
     redisClient.on("error", (err) => {
-      console.error("Redis Client Error:", err);
+      logger.error("Redis Client Error", { errorMessage: err.message, errorName: err.name, stack: err.stack, component: COMPONENT_NAME });
     });
 
     redisClient.on("connect", () => {
-      console.log("✅ Redis client connected");
+      logger.info("Redis client connected successfully", { redis_url: process.env.REDIS_URL || "redis://localhost:6379", component: COMPONENT_NAME });
     });
 
-    // Connect to Redis
     await redisClient.connect();
-  } catch (error) {
-    console.error("❌ Redis connection failed:", error);
+  } catch (error: any) {
+    logger.error("Redis connection failed during initialization", {
+      errorMessage: error.message,
+      errorName: error.name,
+      stack: error.stack,
+      redis_url: process.env.REDIS_URL || "redis://localhost:6379",
+      component: COMPONENT_NAME
+    });
   }
 };
 
-// Get Redis client (to be used by other modules)
 export const getRedisClient = (): RedisClientType => {
+  if (!redisClient) {
+    logger.warn("Redis client requested before initialization or after a connection failure.", { component: COMPONENT_NAME });
+  }
   return redisClient;
 };

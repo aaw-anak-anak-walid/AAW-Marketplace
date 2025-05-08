@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  fluent-bit-central:
+    image: fluent/fluent-bit:latest
+    container_name: fluent-bit-central-instance
+    ports:
+      - "24224:24224"      # For receiving logs via TCP (fluentd forward)
+      - "24224:24224/udp"  # If using UDP
+      - "2020:2020"        # For Fluent Bit's HTTP monitoring
+    volumes:
+      - ./fluent-bit-central:/fluent-bit/etc/:ro 
+    networks:
+      - shared_logging_network # Connect to the shared network
+
+networks:
+  shared_logging_network:
+    driver: bridge
+    name: shared_logging_network

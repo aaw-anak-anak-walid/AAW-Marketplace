@@ -7,7 +7,6 @@ const router = express.Router();
 
 router.post("/register", validate(Validation.registerSchema), Handler.registerHandler);
 router.post("/login", validate(Validation.loginSchema), Handler.loginHandler);
-router.post("/admin-login", validate(Validation.loginSchema), Handler.adminLoginHandler);
 router.post("/verify-token", validate(Validation.verifyTokenSchema), Handler.verifyTokenHandler);
 router.post("/verify-admin-token", validate(Validation.verifyAdminTokenSchema), Handler.verifyAdminTokenHandler);
 

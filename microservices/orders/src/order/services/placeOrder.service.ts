@@ -1,4 +1,3 @@
-// src/services/placeOrder.service.ts
 import {
   BadRequestResponse,
   InternalServerErrorResponse,
@@ -10,93 +9,121 @@ import { withRetry } from "@src/utils/retry";
 import { Product } from "@type/product";
 import { User } from "@type/user";
 
-// Import cart service and cache utilities
+import logger from "@src/config/logger";
 import { getAllCartItemsService } from "../../cart/services/getAllCartItems.service";
 import { createOrder } from "../dao/createOrder.dao";
 import { orderCache, cartCache } from "@src/commons/utils/redis";
+
+const COMPONENT_NAME = "PlaceOrderService";
 
 export const placeOrderService = async (
   user: User,
   shipping_provider: string
 ) => {
+  logger.info("Place order attempt initiated", { userId: user.id, shipping_provider, component: COMPONENT_NAME });
   try {
     const SERVER_TENANT_ID = process.env.TENANT_ID;
     if (!SERVER_TENANT_ID) {
+      logger.error("Server tenant ID (TENANT_ID) not found for placing order.", { userId: user.id, component: COMPONENT_NAME });
       return new InternalServerErrorResponse(
         "Server tenant id not found"
       ).generate();
     }
+    logger.info("Tenant ID successfully retrieved for order placement", { tenantId: SERVER_TENANT_ID, userId: user.id, component: COMPONENT_NAME });
 
     if (
       !["JNE", "TIKI", "SICEPAT", "GOSEND", "GRAB_EXPRESS"].includes(
         shipping_provider
       )
     ) {
+      logger.warn("Shipping provider not found", { userId: user.id, shipping_provider, component: COMPONENT_NAME });
       return new NotFoundResponse("Shipping provider not found").generate();
     }
 
     if (!user.id) {
+      logger.error("User ID not found in user object for placing order.", { component: COMPONENT_NAME });
       return new InternalServerErrorResponse("User id not found").generate();
     }
+    const userId = user.id;
+    logger.info("User ID validated for order placement", { userId, component: COMPONENT_NAME });
 
-    // 2) Fetch *all* cart items in one go by asking for a huge limit
+    logger.info("Fetching cart items for user", { userId, component: COMPONENT_NAME });
     const cartResponse = await withRetry(() =>
       getAllCartItemsService(user, 1, 1_000_000)
     );
-    if (cartResponse.status !== 200) return cartResponse;
+    if (cartResponse.status !== 200) {
+      logger.warn("Failed to fetch cart items, received non-200 status from getAllCartItemsService", { userId, cartStatus: cartResponse.status, component: COMPONENT_NAME });
+      return cartResponse;
+    }
+    logger.info("Successfully fetched cart items", { userId, itemCount: (cartResponse.data as any).cartItems?.length, component: COMPONENT_NAME });
 
-    // Narrow the union so TS knows you have cartItems[]
     const data = cartResponse.data;
     if (!("cartItems" in data)) {
-      // Shouldn't happen in the 200 case, but guard defensively
+      logger.error("Cart items not found in response data despite 200 status from cart service", { userId, component: COMPONENT_NAME });
       return new BadRequestResponse("Unable to load cart items").generate();
     }
     const cartItems = data.cartItems;
 
-    // Check for empty cart
     if (cartItems.length === 0) {
+      logger.info("Cart is empty, cannot place order", { userId, component: COMPONENT_NAME });
       return new BadRequestResponse("Cart is empty").generate();
     }
+    logger.info(`Cart contains ${cartItems.length} items. Proceeding to fetch product details.`, { userId, itemCount: cartItems.length, component: COMPONENT_NAME });
 
+    const productIds = cartItems.map((item) => item.product_id);
+    logger.info("Fetching product details from product microservice", { userId, productIdsCount: productIds.length, component: COMPONENT_NAME });
     const products: AxiosResponse<Product[]> = await axios.post(
       `${process.env.PRODUCT_MS_URL}/product/many`,
-      { productIds: cartItems.map((item) => item.product_id) }
+      { productIds }
     );
     if (products.status !== 200) {
+      logger.error("Failed to get products from product microservice", { userId, productMSStatus: products.status, component: COMPONENT_NAME });
       return new InternalServerErrorResponse(
         "Failed to get products"
       ).generate();
     }
-    const userId = user.id;
+    logger.info("Successfully fetched product details", { userId, productCount: products.data.length, component: COMPONENT_NAME });
 
-    // 7) Finally create the order
-    const order = await withRetry(() =>
+
+    logger.info("Creating order in database", { userId, shipping_provider, component: COMPONENT_NAME });
+    const { order } = await withRetry(() =>
       createOrder(
         SERVER_TENANT_ID,
         userId,
         cartItems,
         products.data,
         shipping_provider as
-          | "JNE"
-          | "TIKI"
-          | "SICEPAT"
-          | "GOSEND"
-          | "GRAB_EXPRESS"
+        | "JNE"
+        | "TIKI"
+        | "SICEPAT"
+        | "GOSEND"
+        | "GRAB_EXPRESS"
       )
     );
+    logger.info("Order successfully created in database", { userId, orderId: order.id, component: COMPONENT_NAME });
 
-    // Invalidate user's order list cache because a new order was created
+    logger.info("Invalidating user's order list cache", { userId, component: COMPONENT_NAME });
     await orderCache.invalidateOrderList(user.id);
+    logger.info("User's order list cache invalidated", { userId, component: COMPONENT_NAME });
 
-    // Invalidate user's cart cache because the cart will be cleared
+    logger.info("Invalidating user's cart cache", { userId, component: COMPONENT_NAME });
     await cartCache.invalidateCart(user.id);
+    logger.info("User's cart cache invalidated", { userId, component: COMPONENT_NAME });
 
+    logger.info("Order placed successfully", { userId, orderId: order.id, component: COMPONENT_NAME });
     return {
       status: 201,
       data: order,
     };
   } catch (err: any) {
-    console.error(err);
+    logger.error("Unexpected error during place order process", {
+      userId: user.id,
+      shipping_provider,
+      errorMessage: err.message,
+      errorName: err.name,
+      stack: err.stack,
+      component: COMPONENT_NAME
+    });
     return new InternalServerErrorResponse(err).generate();
   }
 };
