@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orders-config
+data:
+  DB_HOST: host.docker.internal
+  DB_PORT: "5001"
+  DB_NAME: postgres
+  REDIS_URL: redis://host.docker.internal:6001 # Change this to the correct Redis service URL

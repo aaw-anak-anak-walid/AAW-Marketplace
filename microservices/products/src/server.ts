@@ -53,6 +53,11 @@ initRedis().then(() => {
 app.use("/product", productRoutes);
 logger.info("Product routes configured.", { component: COMPONENT_NAME });
 
+// Health check endpoint
+app.get('/health', (_, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 app.get("/", (req, res) => {
   return res.status(200).send("Products Microservice is running!");
 });

@@ -34,6 +34,11 @@ app.get('/metrics', async (req, res) => {
 
 app.use('/wishlist', wishlistRoutes);
 
+// Health check endpoint
+app.get('/health', (_, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 app.get("/", (req, res) => {
   return res.status(200).send("Wishlist Microservice is running!");
 });

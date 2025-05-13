@@ -3,6 +3,7 @@ services:
   # Node.js application service
   microservice:
     build: .
+    image: ilhamelhamdi/anak-anak-walid-auth-service:latest
     ports:
       - "8000:8000"
     environment:

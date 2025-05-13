@@ -37,7 +37,12 @@ app.get('/metrics', async (req, res) => {
   res.end(await register.metrics());
 });
 
-app.use("/user", userRoutes);
+app.use("/auth", userRoutes);
+
+// Health check endpoint
+app.get('/health', (_, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
 
 app.get("/", (req, res) => {
   logger.info("Health check endpoint called for Authentication Microservice", {
