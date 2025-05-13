@@ -27,7 +27,7 @@ spec:
         pathType: ImplementationSpecific
         backend:
           service:
-            name: orders-service # Assuming orders-service handles /cart/...
+            name: orders-service
             port:
               number: 80
       - path: /api/(product)(/|$)(.*)
@@ -35,13 +35,6 @@ spec:
         backend:
           service:
             name: product-service
-            port:
-              number: 80
-      - path: /api/(category)(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: product-service # Assuming product-service handles /category/...
             port:
               number: 80
       - path: /api/(tenant)(/|$)(.*)
