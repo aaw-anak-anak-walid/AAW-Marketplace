@@ -58,6 +58,11 @@ initRedis();
 app.use('/order', orderRoutes);
 app.use('/cart', cartRoutes);
 
+// Health check endpoint
+app.get('/health', (_, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
 app.get("/", (req: Request, res: Response) => {
   logger.info("Root health check endpoint hit", { ip: req.ip, path: req.originalUrl, component: COMPONENT_NAME });
   return res.status(200).send("Orders Microservice is running!");

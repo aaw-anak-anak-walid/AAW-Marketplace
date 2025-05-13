@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   # Node.js application service
   microservice:
     build: .
+    image: ilhamelhamdi/anak-anak-walid-tenant-service:latest
     environment:
       - TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
       - ADMIN_TENANT_ID=47dd6b24-0b23-46b0-a662-776158d089ba
