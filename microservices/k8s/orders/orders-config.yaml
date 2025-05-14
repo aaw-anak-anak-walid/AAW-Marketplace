@@ -7,4 +7,4 @@ data:
   DB_PORT: "5432"
   DB_NAME: postgres
   DB_SSL: "true"
-  REDIS_URL: redis://order-redis-yvhc6s.serverless.use1.cache.amazonaws.com:6379
+  REDIS_URL: rediss://order-redis-yvhc6s.serverless.use1.cache.amazonaws.com:6379
