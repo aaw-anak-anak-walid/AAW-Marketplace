@@ -1,0 +1,51 @@
+controller:
+  # Jalankan controller sebagai DaemonSet agar ada satu pod di setiap node (atau node yang memenuhi syarat)
+  # Ini meningkatkan ketersediaan tinggi untuk Ingress controller.
+  kind: DaemonSet
+
+  # Konfigurasi untuk resource IngressClass
+  ingressClassResource:
+    name: nginx # Nama IngressClass yang akan dibuat atau digunakan.
+                # Pastikan Ingress resource-mu (api-ingress.yaml) menggunakan `ingressClassName: nginx`.
+    enabled: true
+    default: false # Set 'true' jika kamu ingin 'nginx' menjadi IngressClass default untuk Ingress baru
+                   # yang tidak menentukan ingressClassName. Jika kamu hanya punya satu Ingress Controller,
+                   # menjadikannya default bisa memudahkan.
+    controllerValue: "k8s.io/ingress-nginx" # Nilai controller yang dikenali oleh IngressClass ini.
+
+  # Konfigurasi untuk Service yang mengekspos controller
+  service:
+    # Gunakan NodePort agar Application Load Balancer (ALB) AWS dapat menargetkan
+    # Nginx Ingress Controller yang berjalan di worker node-mu.
+    type: NodePort
+
+    # Opsional: Tentukan NodePort secara eksplisit jika kamu ingin menggunakan port yang sudah ada
+    # atau port tertentu. Jika tidak diset, Helm/Kubernetes akan memilih port secara acak dari range NodePort.
+    # Jika kamu sudah mengkonfigurasi Target Group ALB untuk NodePort tertentu (misalnya 32597 untuk HTTP),
+    # kamu bisa menspesifikasikannya di sini agar tidak perlu mengubah konfigurasi ALB.
+    # Hapus atau komentari bagian 'nodePorts' jika ingin port dipilih secara otomatis.
+    # nodePorts:
+    #   http: 32597
+    #   # https: 32666 # Jika kamu juga menggunakan HTTPS dan memiliki NodePort untuk itu
+
+  # Konfigurasi untuk admission webhooks
+  # Penting untuk validasi resource Ingress.
+  admissionWebhooks:
+    patch:
+      # Pastikan job untuk mem-patch admission webhook berjalan di node Linux,
+      # karena image yang digunakan biasanya berbasis Linux.
+      nodeSelector:
+        kubernetes.io/os: linux
+
+  # Opsi tambahan yang mungkin relevan (biasanya defaultnya sudah baik):
+  # replicaCount: 1 # Tidak berlaku jika kind: DaemonSet
+
+  # Pastikan metrik Prometheus terekspos jika kamu menggunakannya
+  # metrics:
+  #   enabled: false # Set true jika kamu ingin mengumpulkan metrik Prometheus dari controller
+
+  # Konfigurasi default backend (biasanya diaktifkan secara default oleh chart dan penting)
+  # Default backend menangani request yang tidak cocok dengan aturan Ingress mana pun
+  # dan seringkali juga melayani endpoint /healthz untuk port traffic utama.
+  # defaultBackend:
+  #   enabled: true
