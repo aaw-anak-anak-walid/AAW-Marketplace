@@ -48,6 +48,11 @@ spec:
             configMapKeyRef:
               name: wishlist-config
               key: DB_NAME
+        - name: DB_SSL
+          valueFrom:
+            configMapKeyRef:
+              name: wishlist-config
+              key: DB_SSL
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -78,3 +83,8 @@ spec:
             secretKeyRef:
               name: common-secret
               key: ADMIN_JWT_SECRET
+        - name: NODE_EXTRA_CA_CERTS
+          valueFrom:
+            configMapKeyRef:
+              name: common-config
+              key: NODE_EXTRA_CA_CERTS

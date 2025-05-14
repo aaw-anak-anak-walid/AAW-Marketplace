@@ -3,6 +3,7 @@ kind: ConfigMap
 metadata:
   name: tenant-config
 data:
-  DB_HOST: host.docker.internal
-  DB_PORT: "5003"
+  DB_HOST: tenant-db.c3ue4uyugmfu.us-east-1.rds.amazonaws.com
+  DB_PORT: "5432"
   DB_NAME: postgres
+  DB_SSL: "true"

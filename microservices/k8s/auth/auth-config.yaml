@@ -3,6 +3,7 @@ kind: ConfigMap
 metadata:
   name: auth-config
 data:
-  DB_HOST: host.docker.internal # Replace with your DB service name
-  DB_PORT: "5000"
+  DB_HOST: auth-db.c3ue4uyugmfu.us-east-1.rds.amazonaws.com
+  DB_PORT: "5432"
   DB_NAME: postgres
+  DB_SSL: "true"

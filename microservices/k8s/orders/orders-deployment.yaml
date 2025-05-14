@@ -48,6 +48,11 @@ spec:
             configMapKeyRef:
               name: orders-config
               key: DB_NAME
+        - name: DB_SSL
+          valueFrom:
+            configMapKeyRef:
+              name: orders-config
+              key: DB_SSL
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -85,3 +90,8 @@ spec:
               key: REDIS_URL
         - name: PRODUCT_MS_URL # equal to product service
           value: "http://product-service:80"
+        - name: NODE_EXTRA_CA_CERTS
+          valueFrom:
+            configMapKeyRef:
+              name: common-config
+              key: NODE_EXTRA_CA_CERTS

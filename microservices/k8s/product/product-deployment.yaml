@@ -48,6 +48,11 @@ spec:
             configMapKeyRef:
               name: product-config
               key: DB_NAME
+        - name: DB_SSL
+          valueFrom:
+            configMapKeyRef:
+              name: product-config
+              key: DB_SSL
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -85,3 +90,8 @@ spec:
               key: REDIS_URL
         - name: TENANT_MS_URL
           value: "http://tenant-service:80"
+        - name: NODE_EXTRA_CA_CERTS
+          valueFrom:
+            configMapKeyRef:
+              name: common-config
+              key: NODE_EXTRA_CA_CERTS
