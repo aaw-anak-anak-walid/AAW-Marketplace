@@ -40,6 +40,13 @@ controller:
   # Opsi tambahan yang mungkin relevan (biasanya defaultnya sudah baik):
   # replicaCount: 1 # Tidak berlaku jika kind: DaemonSet
 
+  config:
+    server-snippet: |
+      location = /healthz {
+        return 200 "healthy\n";
+        access_log off;
+      }
+
   # Pastikan metrik Prometheus terekspos jika kamu menggunakannya
   # metrics:
   #   enabled: false # Set true jika kamu ingin mengumpulkan metrik Prometheus dari controller
