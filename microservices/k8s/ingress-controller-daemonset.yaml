@@ -47,5 +47,5 @@ controller:
   # Konfigurasi default backend (biasanya diaktifkan secara default oleh chart dan penting)
   # Default backend menangani request yang tidak cocok dengan aturan Ingress mana pun
   # dan seringkali juga melayani endpoint /healthz untuk port traffic utama.
-  # defaultBackend:
-  #   enabled: true
+  defaultBackend:
+    enabled: true
