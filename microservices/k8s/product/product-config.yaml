@@ -3,7 +3,8 @@ kind: ConfigMap
 metadata:
   name: product-config
 data:
-  DB_HOST: host.docker.internal
-  DB_PORT: "5002"
+  DB_HOST: product-1.c3ue4uyugmfu.us-east-1.rds.amazonaws.com
+  DB_PORT: "5432"
   DB_NAME: postgres
-  REDIS_URL: redis://host.docker.internal:6002 # Change this to the correct Redis service URL
+  DB_SSL: "true"
+  REDIS_URL: rediss://product-redis-yvhc6s.serverless.use1.cache.amazonaws.com:6379

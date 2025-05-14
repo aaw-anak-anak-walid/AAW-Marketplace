@@ -1,0 +1,42 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  # This kubeadmConfigPatch labels the control-plane node so that the
+  # NGINX Ingress controller (which often has a nodeSelector for "ingress-ready=true"
+  # in its Kind-specific deployment) can be scheduled on it.
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  # These are the crucial port mappings from your host to the Kind control-plane node.
+  # This allows you to access the Ingress controller via localhost:80 and localhost:443
+  # on your host machine (Windows).
+  extraPortMappings:
+  - containerPort: 80  # Port inside the Kind node (control-plane container) where Ingress listens for HTTP
+    hostPort: 80     # Port on your host machine (Windows) that maps to containerPort 80
+    protocol: TCP
+  - containerPort: 443 # Port inside the Kind node (control-plane container) where Ingress listens for HTTPS
+    hostPort: 443    # Port on your host machine (Windows) that maps to containerPort 443
+    protocol: TCP
+# You can add worker nodes here if your setup requires them.
+# If you add worker nodes and want the Ingress controller to potentially run on them,
+# you might also label them with "ingress-ready=true".
+# For accessing Ingress via localhost on Docker Desktop, mapping to the control-plane
+# is typically sufficient.
+# - role: worker
+#   kubeadmConfigPatches:
+#   - |
+#     kind: JoinConfiguration
+#     nodeRegistration:
+#       kubeletExtraArgs:
+#         node-labels: "ingress-ready=true"
+# - role: worker
+#   kubeadmConfigPatches:
+#   - |
+#     kind: JoinConfiguration
+#     nodeRegistration:
+#       kubeletExtraArgs:
+#         node-labels: "ingress-ready=true"

@@ -2,7 +2,7 @@ import { pgTable, primaryKey, uuid, text, timestamp, varchar, boolean } from 'dr
 
 export const users = pgTable('users', {
     id: uuid('id').defaultRandom().unique(),
-    tenant_id: uuid('tenant_id').default('00000000-0000-0000-0000-000000000000'),
+    tenant_id: uuid('tenant_id').notNull().default('00000000-0000-0000-0000-000000000000'),
     username: varchar('username', { length: 256 }).notNull(),
     email: varchar('email', { length: 256 }).notNull(),
     password: varchar('password', { length: 256 }).notNull(),
