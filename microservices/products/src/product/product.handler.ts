@@ -8,10 +8,11 @@ type PaginatedCategoryReq = Request<
   { page: number; limit: number }>;
 
 export const getAllProductsHandler = async (
-  req: PaginatedReq,
+  req: Request,
   res: Response
 ) => {
-  const { page, limit } = req.query;
+  const page = parseInt(req.query.page as string, 10) || 1;
+  const limit = parseInt(req.query.limit as string, 10) || 10;
   const response = await Service.getAllProductsService(page, limit);
   return res.status(response.status).send(response.data);
 };
@@ -32,11 +33,12 @@ export const getProductByIdHandler = async (req: Request, res: Response) => {
 };
 
 export const getProductByCategoryHandler = async (
-  req: PaginatedCategoryReq,
+  req: Request,
   res: Response
 ) => {
   const { category_id } = req.params;
-  const { page, limit } = req.query;
+  const page = parseInt(req.query.page as string, 10) || 1;
+  const limit = parseInt(req.query.limit as string, 10) || 10;
   const response = await Service.getProductByCategoryService(category_id, page, limit);
   return res.status(response.status).send(response.data);
 };
@@ -55,10 +57,11 @@ export const createProductHandler = async (req: Request, res: Response) => {
 };
 
 export const getAllCategoryHandler = async (
-  req: PaginatedReq,
+  req: Request,
   res: Response
 ) => {
-  const { page, limit } = req.query;
+  const page = parseInt(req.query.page as string, 10) || 1;
+  const limit = parseInt(req.query.limit as string, 10) || 10;
   const response = await Service.getAllCategoriesService(page, limit);
   return res.status(response.status).send(response.data);
 };
