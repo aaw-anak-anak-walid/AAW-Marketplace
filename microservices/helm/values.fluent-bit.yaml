@@ -39,11 +39,10 @@ config:
         Name                grep
         Match               kube.*
         Regex               kubernetes.labels.app auth|product|orders|tenant|wishlist
-        Add_Tag             deployments
 
     [FILTER]
         Name                parser
-        Match               deployments.*
+        Match               kube.*
         Key_Name            log
         Parser              winston_json_parser
         Reserve_Data        On
@@ -53,7 +52,7 @@ config:
   outputs: |
     [OUTPUT]
         Name                  cloudwatch_logs
-        Match                 deployments.*
+        Match                 kube.*
         region                us-east-1
         log_group_name        /kubernetes/fluent-bit-logs
         log_stream_prefix     from-fluent-bit-
