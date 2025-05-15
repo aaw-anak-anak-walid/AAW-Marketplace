@@ -14,7 +14,7 @@ const ORDER_COUNT = 256;
 const CART_COUNT = 32;
 
 
-const PRODUCT_API_BASE_URL = process.env.PRODUCT_API_BASE_URL || 'http://52.91.74.61:32303/api/product';
+const PRODUCT_API_BASE_URL = process.env.PRODUCT_API_BASE_URL || 'http://aaw-kubeadm-ingress-alb-2051696032.us-east-1.elb.amazonaws.com/api/product';
 
 
 async function fetchAvailableProducts() {
