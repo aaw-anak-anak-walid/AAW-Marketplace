@@ -53,7 +53,7 @@ config:
         auto_create_group     true
         log_retention_days    30
 
-  customParsers: |
+  winstonJsonParser: |
     [PARSER]
         Name        winston_json_parser
         Format      json
