@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-pvc
+  namespace: monitoring # Pastikan namespace ini sama dengan namespace Deployment Grafana Anda
+spec:
+  accessModes:
+    # ReadWriteOnce berarti volume dapat di-mount sebagai read-write oleh satu Node pada satu waktu.
+    # Ini adalah mode akses yang umum untuk sebagian besar aplikasi stateful seperti Grafana.
+    - ReadWriteOnce
+  resources:
+    requests:
+      # Anda dapat menyesuaikan ukuran penyimpanan ini sesuai kebutuhan Grafana Anda.
+      # Untuk memulai, 5Gi atau 10Gi biasanya cukup.
+      storage: 5Gi
+  # storageClassName: "your-storage-class-name" # Hapus komentar dan ganti jika Anda ingin menggunakan StorageClass tertentu.
+  # Contoh untuk AWS gp2: storageClassName: gp2
+  # Contoh untuk AWS gp3: storageClassName: gp3
+  # Jika Anda biarkan terkomentari atau hapus baris ini, PVC akan menggunakan StorageClass default cluster Anda.
