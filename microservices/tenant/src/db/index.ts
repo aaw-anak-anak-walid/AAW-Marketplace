@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool, PoolConfig } from "pg";
 import "dotenv/config";
 import fs from 'fs';
-
+import logger from '../config/logger';
 
 const DB_HOST = process.env.DB_HOST ?? "localhost";
 const DB_PORT = parseInt(process.env.DB_PORT ?? "5432", 10);
@@ -12,36 +12,37 @@ const DB_NAME = process.env.DB_NAME ?? "postgres";
 const DB_SSL_ENV = process.env.DB_SSL;
 const NODE_EXTRA_CA_CERTS_PATH = process.env.NODE_EXTRA_CA_CERTS;
 
+const component = "db/index.ts";
 
-console.log(`[db/index.ts] DB_HOST: ${DB_HOST}`);
-console.log(`[db/index.ts] DB_SSL_ENV: ${DB_SSL_ENV}`);
-console.log(`[db/index.ts] NODE_EXTRA_CA_CERTS_PATH: ${NODE_EXTRA_CA_CERTS_PATH}`);
+logger.debug(`DB_HOST: ${DB_HOST}`, { component });
+logger.debug(`DB_SSL_ENV: ${DB_SSL_ENV}`, { component });
+logger.debug(`NODE_EXTRA_CA_CERTS_PATH: ${NODE_EXTRA_CA_CERTS_PATH}`, { component });
 
 let sslOptions: PoolConfig['ssl'] = undefined;
 
 if (DB_SSL_ENV === 'true') {
-  console.log(`[db/index.ts] SSL is enabled via DB_SSL.`);
+  logger.info(`SSL is enabled via DB_SSL.`, { component });
   sslOptions = {
     rejectUnauthorized: true,
   };
 
   if (NODE_EXTRA_CA_CERTS_PATH) {
-    console.log(`[db/index.ts] Attempting to load CA from: ${NODE_EXTRA_CA_CERTS_PATH}`);
+    logger.debug(`Attempting to load CA from: ${NODE_EXTRA_CA_CERTS_PATH}`, { component });
     if (fs.existsSync(NODE_EXTRA_CA_CERTS_PATH)) {
       try {
         sslOptions.ca = fs.readFileSync(NODE_EXTRA_CA_CERTS_PATH).toString();
-        console.log(`[db/index.ts] Successfully loaded CA from ${NODE_EXTRA_CA_CERTS_PATH}`);
+        logger.info(`Successfully loaded CA from ${NODE_EXTRA_CA_CERTS_PATH}`, { component });
       } catch (e: any) {
-        console.error(`[db/index.ts] Error reading CA file ${NODE_EXTRA_CA_CERTS_PATH}: ${e.message}`);
+        logger.error(`Error reading CA file ${NODE_EXTRA_CA_CERTS_PATH}: ${e.message}`, { component, stack: e.stack });
       }
     } else {
-      console.warn(`[db/index.ts] CA file specified in NODE_EXTRA_CA_CERTS_PATH (${NODE_EXTRA_CA_CERTS_PATH}) does not exist.`);
+      logger.warn(`CA file specified in NODE_EXTRA_CA_CERTS_PATH (${NODE_EXTRA_CA_CERTS_PATH}) does not exist.`, { component });
     }
   } else {
-    console.log(`[db/index.ts] NODE_EXTRA_CA_CERTS_PATH is not set. SSL will use system CAs.`);
+    logger.debug(`NODE_EXTRA_CA_CERTS_PATH is not set. SSL will use system CAs.`, { component });
   }
 } else {
-  console.log(`[db/index.ts] SSL is disabled or DB_SSL is not 'true'.`);
+  logger.info(`SSL is disabled or DB_SSL is not 'true'.`, { component });
 }
 
 const poolConfig: PoolConfig = {
@@ -59,14 +60,13 @@ if (sslOptions) {
 export const pool = new Pool(poolConfig);
 
 pool.on('connect', () => {
-  console.log('[db/index.ts] pg.Pool: New client connected to the database.');
+  logger.debug('pg.Pool: New client connected to the database.', { component });
 });
 
 pool.on('error', (err, client) => {
-  console.error('[db/index.ts] pg.Pool: Unexpected error on idle client', err);
-
+  logger.error('pg.Pool: Unexpected error on idle client', { component, stack: err.stack, client });
 });
 
 export const db = drizzle(pool);
 
-console.log('[db/index.ts] Database pool and Drizzle instance configured.');
+logger.info('Database pool and Drizzle instance configured.', { component });

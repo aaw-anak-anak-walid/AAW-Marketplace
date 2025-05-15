@@ -6,7 +6,15 @@ import cors from "cors";
 import promClient from "prom-client";
 import express_prom_bundle from "express-prom-bundle";
 
+// Import logger dan morgan
+import morgan from "morgan";
+import logger, { morganStream } from "./config/logger"; // Sesuaikan path jika perlu
+
 import tenantRoutes from './tenant/tenant.routes';
+
+const COMPONENT_NAME = "TenantMicroserviceApp";
+
+logger.info("Tenant Microservice - Initialization started.", { component: COMPONENT_NAME });
 
 const register = new promClient.Registry();
 
@@ -20,12 +28,17 @@ const metricsMiddleware = express_prom_bundle({
   includePath: true,
   includeStatusCode: true,
   includeUp: true
-})
+});
+logger.info("Prometheus metrics configured.", { component: COMPONENT_NAME });
 
 const app = express();
+
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { stream: morganStream }));
+
 app.use(metricsMiddleware);
 app.use(cors());
 app.use(express.json());
+logger.info("Core middleware (morgan, metrics, CORS, JSON parser) configured.", { component: COMPONENT_NAME });
 
 app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
@@ -33,6 +46,7 @@ app.get('/metrics', async (req, res) => {
 });
 
 app.use("/tenant", tenantRoutes);
+logger.info("Tenant routes configured.", { component: COMPONENT_NAME });
 
 // Health check endpoint
 app.get('/health', (_, res) => {
@@ -45,5 +59,5 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 8003;
 app.listen(PORT, () => {
-  console.log(`🚀 Tenant Microservice has started on port ${PORT}`);
+  logger.info(`🚀 Tenant Microservice has started on port ${PORT}`, { port: PORT, component: COMPONENT_NAME });
 });

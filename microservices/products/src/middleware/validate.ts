@@ -1,43 +1,45 @@
-// src/middleware/validate.ts
-import { z, ZodObject, ZodRawShape } from "zod";
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import { z } from "zod";
+import { Request, Response, NextFunction } from "express";
+import logger from "../config/logger"; 
 
-export function validate<S extends ZodObject<ZodRawShape>>(
-  schema: S
-): RequestHandler<
-  // params
-  "params" extends keyof S["shape"] ? z.infer<S["shape"]["params"]> : {},
-  // response (ignored)
-  any,
-  // body
-  "body" extends keyof S["shape"] ? z.infer<S["shape"]["body"]> : {},
-  // query
-  "query" extends keyof S["shape"] ? z.infer<S["shape"]["query"]> : {}
-> {
-  return async (req, res, next) => {
+const COMPONENT_NAME = "ValidationMiddleware";
+
+export const validate = (schema: z.Schema) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Parse exactly the parts your schema cares about
-      const result = await schema.parseAsync({
+      await schema.parseAsync({
         body: req.body,
         query: req.query,
         params: req.params,
       });
-
-      // Overwrite with the _validated_ & coerced values
-      if (result.body) req.body = result.body;
-      if (result.query) req.query = result.query;
-      if (result.params) req.params = result.params;
-
       next();
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Validation errors in your request",
-          errors: err.issues,
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        logger.warn("Validation failed", {
+          component: COMPONENT_NAME,
+          path: req.path,
+          method: req.method,
+          errors: error.issues,
+          requestBody: req.body,
+          requestQuery: req.query,
+          requestParams: req.params,
         });
+        res.status(400).json({
+          message: "Validation errors in your request",
+          errors: error.issues,
+        });
+      } else {
+        logger.error("Internal server error during validation", {
+          component: COMPONENT_NAME,
+          path: req.path,
+          method: req.method,
+          error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+          requestBody: req.body,
+          requestQuery: req.query,
+          requestParams: req.params,
+        });
+        res.status(500).json({message: "Internal server error"});
       }
-      console.error(err);
-      return res.status(500).json({ message: "Internal server error" });
     }
   };
-}
+};
