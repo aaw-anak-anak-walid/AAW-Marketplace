@@ -85,6 +85,11 @@ spec:
             secretKeyRef:
               name: common-secret
               key: ADMIN_JWT_SECRET
+        - name: LOG_LEVEL_WORKLOAD_TEST
+          valueFrom:
+            configMapKeyRef:
+              name: common-config
+              key: LOG_LEVEL_WORKLOAD_TEST
         - name: NODE_EXTRA_CA_CERTS
           value: "/etc/ssl/certs/rds-ca/global-bundle.pem"
         volumeMounts:

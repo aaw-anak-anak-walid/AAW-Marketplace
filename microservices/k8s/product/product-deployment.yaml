@@ -88,6 +88,11 @@ spec:
             configMapKeyRef:
               name: product-config
               key: REDIS_URL
+        - name: LOG_LEVEL_WORKLOAD_TEST
+          valueFrom:
+            configMapKeyRef:
+              name: common-config
+              key: LOG_LEVEL_WORKLOAD_TEST
         - name: TENANT_MS_URL
           value: "http://tenant-service:80"
         - name: NODE_EXTRA_CA_CERTS
