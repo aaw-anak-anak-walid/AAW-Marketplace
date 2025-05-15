@@ -9,7 +9,7 @@ config:
         Flush        1
         Daemon       Off
         Log_Level    info
-        Parsers_File /fluent-bit/etc/parsers.conf,/fluent-bit/etc/custom_parsers.conf
+        Parsers_File /fluent-bit/etc/custom-parsers.conf
         HTTP_Server  On
         HTTP_Listen  0.0.0.0
         HTTP_Port    2020
@@ -65,10 +65,10 @@ extraVolumes:
     configMap:
       name: fluent-bit
       items:
-        - key: custom_parsers.conf
-          path: custom_parsers.conf
+        - key: custom-parsers.conf
+          path: custom-parsers.conf
 
 extraVolumeMounts:
   - name: custom-parsers
-    mountPath: /fluent-bit/etc/custom_parsers.conf
-    subPath: custom_parsers.conf
+    mountPath: /fluent-bit/etc/custom-parsers.conf
+    subPath: custom-parsers.conf
