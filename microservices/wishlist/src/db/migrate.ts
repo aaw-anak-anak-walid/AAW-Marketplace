@@ -31,5 +31,4 @@ main().catch((error) => {
         component: COMPONENT_NAME,
         error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
     });
-    process.exit(1);
 });
