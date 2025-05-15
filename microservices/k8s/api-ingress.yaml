@@ -52,21 +52,3 @@ spec:
             name: wishlist-service
             port:
               number: 80
-
-      # Routing untuk Grafana
-      - path: /grafana(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: grafana
-            port:
-              number: 3000
-
-      # Routing untuk Prometheus
-      - path: /prometheus(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: prometheus
-            port:
-              number: 9090
