@@ -17,8 +17,8 @@ config:
   inputs: |
     [INPUT]
         Name              tail
-        Tag               kube.*
-        Path              /var/log/containers/*.log
+        Tag               deployment.*
+        Path              /var/log/containers/*deployment*.log
         Parser            docker
         DB                /var/log/flb_kube.db
         Mem_Buf_Limit     5MB
@@ -28,7 +28,7 @@ config:
   filters: |
     [FILTER]
         Name                kubernetes
-        Match               kube.*
+        Match               deployment.*
         Merge_Log           On
         Keep_Log            Off
         Kube_Tag_Prefix     kube.var.log.containers.
@@ -36,23 +36,17 @@ config:
         K8S-Logging.Exclude Off
 
     [FILTER]
-        Name                grep
-        Match               kube.*
-        Regex               kubernetes.labels.app auth|product|orders|tenant|wishlist
-
-    [FILTER]
-        Name                parser
-        Match               kube.*
-        Key_Name            log
-        Parser              winston_json_parser
-        Reserve_Data        On
-        Preserve_Key        On
-
+        Name         parser
+        Match        deployment.*
+        Key_Name     log
+        Parser       winston_json_parser
+        Reserve_Data On
+        Preserve_Key On
 
   outputs: |
     [OUTPUT]
         Name                  cloudwatch_logs
-        Match                 kube.*
+        Match                 deployment.*
         region                us-east-1
         log_group_name        /kubernetes/fluent-bit-logs
         log_stream_prefix     from-fluent-bit-
@@ -65,7 +59,6 @@ config:
         Format      json
         Time_Key    timestamp
         Time_Format %Y-%m-%dT%H:%M:%S.%LZ
-        Decode_Field_As json log
 
 extraVolumes:
   - name: custom-parsers
