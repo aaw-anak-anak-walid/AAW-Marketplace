@@ -5,10 +5,7 @@ export const getAllUserWishlistHandler = async (
   req: Request,
   res: Response
 ) => {
-  const { page, limit } = req.query as unknown as {
-    page: number;
-    limit: number;
-  };
+  const {page, limit} = req.query as unknown as {page: number; limit: number};
   const { user } = req.body;
   const response = await Service.getAllUserWishlistService(user, page, limit);
   return res.status(response.status).send(response.data);

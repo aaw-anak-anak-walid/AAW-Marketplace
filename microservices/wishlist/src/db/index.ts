@@ -22,7 +22,7 @@ let sslOptions: PoolConfig['ssl'] = undefined;
 if (DB_SSL_ENV === 'true') {
   console.log(`[db/index.ts] SSL is enabled via DB_SSL.`);
   sslOptions = {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   };
 
   if (NODE_EXTRA_CA_CERTS_PATH) {

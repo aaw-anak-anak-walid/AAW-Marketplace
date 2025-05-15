@@ -23,7 +23,7 @@ let sslOptions: PoolConfig['ssl'] = undefined;
 if (DB_SSL_ENV === 'true') {
   logger.info(`SSL is enabled via DB_SSL.`, { component });
   sslOptions = {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   };
 
   if (NODE_EXTRA_CA_CERTS_PATH) {

@@ -11,8 +11,7 @@ export const getAllProductsHandler = async (
   req: Request,
   res: Response
 ) => {
-  const page = parseInt(req.query.page as string, 10) || 1;
-  const limit = parseInt(req.query.limit as string, 10) || 10;
+  const {page, limit} = req.query as unknown as {page: number; limit: number};
   const response = await Service.getAllProductsService(page, limit);
   return res.status(response.status).send(response.data);
 };
@@ -37,8 +36,7 @@ export const getProductByCategoryHandler = async (
   res: Response
 ) => {
   const { category_id } = req.params;
-  const page = parseInt(req.query.page as string, 10) || 1;
-  const limit = parseInt(req.query.limit as string, 10) || 10;
+  const {page, limit} = req.query as unknown as {page: number; limit: number};
   const response = await Service.getProductByCategoryService(category_id, page, limit);
   return res.status(response.status).send(response.data);
 };
@@ -60,8 +58,7 @@ export const getAllCategoryHandler = async (
   req: Request,
   res: Response
 ) => {
-  const page = parseInt(req.query.page as string, 10) || 1;
-  const limit = parseInt(req.query.limit as string, 10) || 10;
+  const {page, limit} = req.query as unknown as {page: number; limit: number};
   const response = await Service.getAllCategoriesService(page, limit);
   return res.status(response.status).send(response.data);
 };

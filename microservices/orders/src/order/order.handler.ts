@@ -4,7 +4,8 @@ import * as Service from "./services";
 type PaginatedReq = Request<{}, any, any, any, { page: number; limit: number }>;
 
 export const getAllOrdersHandler = async (req: PaginatedReq, res: Response) => {
-  const { page, limit } = req.query;
+  const page = parseInt(req.query.page as string, 10) || 1;
+  const limit = parseInt(req.query.limit as string, 10) || 10;
   const { user } = req.body;
   const response = await Service.getAllOrdersService(user, page, limit);
   return res.status(response.status).send(response.data);

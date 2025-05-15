@@ -7,11 +7,15 @@ const COMPONENT_NAME = "ValidationMiddleware";
 export const validate = (schema: z.Schema) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await schema.parseAsync({
-        body: req.body,
+      const validated = schema.parse({
         query: req.query,
+        body: req.body,
         params: req.params,
       });
+
+      req.query = validated.query || {};
+      req.body = validated.body || {};
+      req.params = validated.params || {};
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
