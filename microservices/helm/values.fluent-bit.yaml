@@ -61,7 +61,7 @@ config:
         Time_Format %Y-%m-%dT%H:%M:%S.%LZ
 
 extraVolumes:
-  - name: custom_parsers
+  - name: custom-parsers
     configMap:
       name: fluent-bit
       items:
@@ -69,6 +69,6 @@ extraVolumes:
           path: custom_parsers.conf
 
 extraVolumeMounts:
-  - name: custom_parsers
+  - name: custom-parsers
     mountPath: /fluent-bit/etc/custom_parsers.conf
     subPath: custom_parsers.conf
