@@ -4,10 +4,6 @@ metadata:
   name: wishlist-deployment
   labels:
     app: wishlist
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: "/metrics"
-    prometheus.io/port: "8004"
 spec:
   replicas: 2
   selector:
@@ -17,6 +13,10 @@ spec:
     metadata:
       labels:
         app: wishlist
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8004"
     spec:
       dnsPolicy: ClusterFirst
       containers:

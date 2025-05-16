@@ -4,10 +4,6 @@ metadata:
   name: auth-deployment
   labels:
     app: auth
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: "/metrics"
-    prometheus.io/port: "8000"
 spec:
   replicas: 3
   selector:
@@ -17,6 +13,10 @@ spec:
     metadata:
       labels:
         app: auth
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
     spec:
       dnsPolicy: ClusterFirst
       containers:

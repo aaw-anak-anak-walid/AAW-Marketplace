@@ -4,10 +4,6 @@ metadata:
   name: orders-deployment
   labels:
     app: orders
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/path: "/metrics"
-    prometheus.io/port: "8001"
 spec:
   replicas: 3
   selector:
@@ -17,6 +13,10 @@ spec:
     metadata:
       labels:
         app: orders
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8001"
     spec:
       dnsPolicy: ClusterFirst
       containers:
