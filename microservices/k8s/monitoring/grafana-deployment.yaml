@@ -15,6 +15,15 @@ spec:
       labels:
         app: grafana
     spec:
+      initContainers:
+      - name: set-grafana-permissions
+        image: busybox:latest
+        command: ['sh', '-c', 'chown -R 472:472 /var/lib/grafana && chmod -R 775 /var/lib/grafana']
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: grafana-data
+          mountPath: /var/lib/grafana
       containers:
       - name: grafana
         image: grafana/grafana:latest
