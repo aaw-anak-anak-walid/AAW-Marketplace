@@ -8,15 +8,15 @@ spec:
   rules:
   - http:
       paths:
-      - path: /grafana(/|$)(.*)
-        pathType: ImplementationSpecific 
+      - path: /grafana
+        pathType: Prefix 
         backend:
           service:
             name: grafana 
             port:
               number: 3000
-      - path: /prometheus(/|$)(.*) 
-        pathType: ImplementationSpecific 
+      - path: /prometheus
+        pathType: Prefix 
         backend:
           service:
             name: prometheus 
